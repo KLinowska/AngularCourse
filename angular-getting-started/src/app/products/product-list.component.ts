@@ -59,6 +59,10 @@ export class ProductListComponent implements OnInit {
     this.showImage = !this.showImage;
   }
 
+  onRatingClicked(message: string): void {
+    this.pageTitle = 'Product List: ' + message;
+  }
+
   ngOnInit(): void {
     console.log('In OnInit');
   }
