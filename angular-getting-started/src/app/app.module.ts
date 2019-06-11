@@ -4,10 +4,11 @@ import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { WelcomeComponent } from './home/welcome.component';
-import { RouterModule } from '@angular/router';
 import { ProductModule } from './products/product.module';
 import { MessageModule } from './messages/message.module';
 import { UserModule } from './user/user.module';
+import { InMemoryWebApiModule } from 'angular-in-memory-web-api';
+import { ProductData } from './products/product-data';
 
 @NgModule({
   declarations: [
@@ -16,16 +17,12 @@ import { UserModule } from './user/user.module';
   ],
   imports: [
     BrowserModule,
-    RouterModule.forRoot([
-      { path: 'welcome',      component: WelcomeComponent },
-      { path: '',   redirectTo: 'welcome', pathMatch: 'full' },
-      { path: '**', redirectTo: 'welcome', pathMatch: 'full' }
-    ]),
+    InMemoryWebApiModule.forRoot(ProductData, { delay: 1000 }),
     HttpClientModule,
     MessageModule,
     UserModule,
+    ProductModule,
     AppRoutingModule,
-    ProductModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -13,7 +13,7 @@ export class ProductListComponent implements OnInit {
   showImage: boolean = false;
   errorMessage: string = '';
 
-  _listFilter: string;
+  _listFilter: string = '';
   get listFilter(): string {
     return this._listFilter;
   }
@@ -21,7 +21,7 @@ export class ProductListComponent implements OnInit {
     this._listFilter = value;
     this.filteredProducts = this.listFilter ? this.performFilter(this.listFilter) : this.products;
   }
-  filteredProducts: Product[];
+  filteredProducts: Product[] = [];
   products: Product[] = [];
 
   constructor(
