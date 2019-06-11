@@ -8,6 +8,8 @@ import { RouterModule } from '@angular/router';
 import { ProductModule } from './products/product.module';
 import { MessageModule } from './messages/message.module';
 import { UserModule } from './user/user.module';
+import { InMemoryWebApiModule } from 'angular-in-memory-web-api';
+import { ProductData } from './products/product-data';
 
 @NgModule({
   declarations: [
@@ -16,6 +18,7 @@ import { UserModule } from './user/user.module';
   ],
   imports: [
     BrowserModule,
+    InMemoryWebApiModule.forRoot(ProductData, { delay: 1000 }),
     RouterModule.forRoot([
       { path: 'welcome',      component: WelcomeComponent },
       { path: '',   redirectTo: 'welcome', pathMatch: 'full' },
