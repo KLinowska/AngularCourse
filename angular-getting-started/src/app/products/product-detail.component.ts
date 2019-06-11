@@ -27,9 +27,18 @@ export class ProductDetailComponent implements OnInit {
 
   getProduct(id: number) {
     this.productService.getProduct(id).subscribe(
-      product => this.product = product,
+      product => this.onProductRetrieved(product),
       error => this.errorMessage = error as any
     );
+  }
+
+  onProductRetrieved(product: Product): void {
+    this.product = product;
+    if (this.product) {
+      this.pageTitle = `Product Detail: &{this.product.productName}`;
+    } else {
+      this.pageTitle = 'No product found';
+    }
   }
 
   onBack(): void {

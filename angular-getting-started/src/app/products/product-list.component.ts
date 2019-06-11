@@ -11,7 +11,7 @@ export class ProductListComponent implements OnInit {
   imageWidth: number = 50;
   imageMargin: number = 2;
   showImage: boolean = false;
-  errorMessage: string;
+  errorMessage: string = '';
 
   _listFilter: string;
   get listFilter(): string {
@@ -46,7 +46,7 @@ export class ProductListComponent implements OnInit {
     this.productService.getProducts().subscribe(
       products => {
         this.products = products;
-        this.filteredProducts = this.products;
+        this.filteredProducts = this.performFilter(this.listFilter);
       },
       error => this.errorMessage = error as any
     );

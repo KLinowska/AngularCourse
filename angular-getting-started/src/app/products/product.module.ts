@@ -10,12 +10,16 @@ import { ProductEditComponent } from './product-edit.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ProductEditGuard } from './product-edit.guard';
 import { ProductData } from './product-data';
+import { ProductEditTagsComponent } from './product-edit-tags.component';
+import { ProductEditInfoComponent } from './product-edit-info.component';
 
 @NgModule({
   declarations: [
     ProductListComponent,
     ProductDetailComponent,
     ConvertToSpacesPipe,
+    ProductEditInfoComponent,
+    ProductEditTagsComponent,
     ProductEditComponent
   ],
   imports: [
