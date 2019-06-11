@@ -7,6 +7,7 @@ import { WelcomeComponent } from './home/welcome.component';
 import { RouterModule } from '@angular/router';
 import { ProductModule } from './products/product.module';
 import { MessageModule } from './messages/message.module';
+import { UserModule } from './user/user.module';
 
 @NgModule({
   declarations: [
@@ -22,6 +23,7 @@ import { MessageModule } from './messages/message.module';
     ]),
     HttpClientModule,
     MessageModule,
+    UserModule,
     AppRoutingModule,
     ProductModule
   ],
