@@ -35,13 +35,9 @@ export class ProductDetailComponent implements OnInit {
   onProductRetrieved(product: Product): void {
     this.product = product;
     if (this.product) {
-      this.pageTitle = `Product Detail: &{this.product.productName}`;
+      this.pageTitle = `Product Detail: ${this.product.productName}`;
     } else {
       this.pageTitle = 'No product found';
     }
-  }
-
-  onBack(): void {
-    this.router.navigate(['/products']);
   }
 }

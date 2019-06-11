@@ -20,7 +20,9 @@ import { ProductEditInfoComponent } from './product-edit-info.component';
   ],
   imports: [
     RouterModule.forChild([
-      { path: 'products', component: ProductListComponent }
+      { path: 'products', component: ProductListComponent },
+      { path: 'products/:id', component: ProductDetailComponent },
+      { path: 'products/:id/edit', component: ProductEditComponent }
     ]),
     ReactiveFormsModule,
     SharedModule
