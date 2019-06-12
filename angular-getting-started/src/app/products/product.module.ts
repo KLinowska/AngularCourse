@@ -8,6 +8,7 @@ import { ProductEditComponent } from './product-edit.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ProductEditTagsComponent } from './product-edit-tags.component';
 import { ProductEditInfoComponent } from './product-edit-info.component';
+import { ProductResolver } from './product-resolver.service';
 
 @NgModule({
   declarations: [
@@ -21,8 +22,16 @@ import { ProductEditInfoComponent } from './product-edit-info.component';
   imports: [
     RouterModule.forChild([
       { path: 'products', component: ProductListComponent },
-      { path: 'products/:id', component: ProductDetailComponent },
-      { path: 'products/:id/edit', component: ProductEditComponent }
+      {
+        path: 'products/:id',
+        component: ProductDetailComponent,
+        resolve: { resolvedData: ProductResolver }
+      },
+      {
+        path: 'products/:id/edit',
+        component: ProductEditComponent,
+        resolve: { resolvedData: ProductResolver }
+      }
     ]),
     ReactiveFormsModule,
     SharedModule
