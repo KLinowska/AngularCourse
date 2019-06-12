@@ -9,6 +9,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ProductEditTagsComponent } from './product-edit-tags.component';
 import { ProductEditInfoComponent } from './product-edit-info.component';
 import { ProductResolver } from './product-resolver.service';
+import { AuthGuard } from '../user/auth.guard';
+import { ProductEditGuard } from './product-edit.guard';
 
 @NgModule({
   declarations: [
@@ -23,6 +25,7 @@ import { ProductResolver } from './product-resolver.service';
     RouterModule.forChild([
       {
         path: 'products',
+        canActivate: [AuthGuard],
         children: [
           {
             path: '',
@@ -35,6 +38,7 @@ import { ProductResolver } from './product-resolver.service';
           {
             path: ':id/edit',
             component: ProductEditComponent,
+            canDeactivate: [ProductEditGuard],
             resolve: { resolvedData: ProductResolver },
             children: [
               {
