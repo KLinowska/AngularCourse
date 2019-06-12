@@ -9,6 +9,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ProductEditTagsComponent } from './product-edit-tags.component';
 import { ProductEditInfoComponent } from './product-edit-info.component';
 import { ProductResolver } from './product-resolver.service';
+import { AuthGuard } from '../user/auth.guard';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { ProductResolver } from './product-resolver.service';
     RouterModule.forChild([
       {
         path: 'products',
+        canActivate: [AuthGuard],
         children: [
           {
             path: '',
