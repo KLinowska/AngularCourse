@@ -10,6 +10,7 @@ import { ProductEditTagsComponent } from './product-edit-tags.component';
 import { ProductEditInfoComponent } from './product-edit-info.component';
 import { ProductResolver } from './product-resolver.service';
 import { AuthGuard } from '../user/auth.guard';
+import { ProductEditGuard } from './product-edit.guard';
 
 @NgModule({
   declarations: [
@@ -37,6 +38,7 @@ import { AuthGuard } from '../user/auth.guard';
           {
             path: ':id/edit',
             component: ProductEditComponent,
+            canDeactivate: [ProductEditGuard],
             resolve: { resolvedData: ProductResolver },
             children: [
               {
