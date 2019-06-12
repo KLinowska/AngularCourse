@@ -1,4 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
@@ -17,6 +18,7 @@ import { ProductData } from './products/product-data';
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     InMemoryWebApiModule.forRoot(ProductData, { delay: 1000 }),
     HttpClientModule,
     MessageModule,
