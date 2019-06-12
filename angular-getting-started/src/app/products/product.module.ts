@@ -30,7 +30,12 @@ import { ProductResolver } from './product-resolver.service';
       {
         path: 'products/:id/edit',
         component: ProductEditComponent,
-        resolve: { resolvedData: ProductResolver }
+        resolve: { resolvedData: ProductResolver },
+        children: [
+          { path: '', redirectTo: 'info', pathMatch: 'full' },
+          { path: 'info', component: ProductEditInfoComponent },
+          { path: 'tags', component: ProductEditTagsComponent }
+        ]
       }
     ]),
     ReactiveFormsModule,
