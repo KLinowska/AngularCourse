@@ -1,27 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { Product } from './product';
 import { ProductService } from './product.service';
 import { ActivatedRoute } from '@angular/router';
+import { CriteriaComponent } from '../shared/criteria/criteria.component';
 
 @Component({
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit {
+export class ProductListComponent implements OnInit, AfterViewInit {
   pageTitle = 'Product List';
   imageWidth: number = 50;
   imageMargin: number = 2;
   showImage: boolean = false;
+  includeDetail: boolean = true;
+  @ViewChild(CriteriaComponent, {static: true}) filterComponent: CriteriaComponent;
   errorMessage: string = '';
-
-  _listFilter: string = '';
-  get listFilter(): string {
-    return this._listFilter;
-  }
-  set listFilter(value: string) {
-    this._listFilter = value;
-    this.filteredProducts = this.listFilter ? this.performFilter(this.listFilter) : this.products;
-  }
+  parentListFilter: string = '';
   filteredProducts: Product[] = [];
   products: Product[] = [];
 
@@ -30,7 +25,11 @@ export class ProductListComponent implements OnInit {
     private productService: ProductService) {
   }
 
-  performFilter(filterBy: string): Product[] {
+  ngAfterViewInit(): void {
+    this.parentListFilter = this.filterComponent.listFilter;
+  }
+
+  performFilter(filterBy?: string): Product[] {
     filterBy = filterBy.toLocaleLowerCase();
     return this.products.filter((product: Product) =>
       product.productName.toLocaleLowerCase().indexOf(filterBy) !== -1);
@@ -45,13 +44,13 @@ export class ProductListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.listFilter = this.route.snapshot.queryParamMap.get('filterBy') || '';
+    //this.listFilter = this.route.snapshot.queryParamMap.get('filterBy') || '';
     this.showImage = this.route.snapshot.queryParamMap.get('showImage') === 'true';
 
     this.productService.getProducts().subscribe(
       products => {
         this.products = products;
-        this.filteredProducts = this.performFilter(this.listFilter);
+        this.filteredProducts = this.performFilter(this.parentListFilter);
       },
       error => this.errorMessage = error as any
     );
