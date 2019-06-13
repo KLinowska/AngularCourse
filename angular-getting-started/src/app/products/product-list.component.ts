@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Product } from './product';
 import { ProductService } from './product.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   templateUrl: './product-list.component.html',
@@ -11,9 +12,9 @@ export class ProductListComponent implements OnInit {
   imageWidth: number = 50;
   imageMargin: number = 2;
   showImage: boolean = false;
-  errorMessage: string;
+  errorMessage: string = '';
 
-  _listFilter: string;
+  _listFilter: string = '';
   get listFilter(): string {
     return this._listFilter;
   }
@@ -21,10 +22,11 @@ export class ProductListComponent implements OnInit {
     this._listFilter = value;
     this.filteredProducts = this.listFilter ? this.performFilter(this.listFilter) : this.products;
   }
-  filteredProducts: Product[];
+  filteredProducts: Product[] = [];
   products: Product[] = [];
 
   constructor(
+    private route: ActivatedRoute,
     private productService: ProductService) {
   }
 
@@ -43,10 +45,13 @@ export class ProductListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.listFilter = this.route.snapshot.queryParamMap.get('filterBy') || '';
+    this.showImage = this.route.snapshot.queryParamMap.get('showImage') === 'true';
+
     this.productService.getProducts().subscribe(
       products => {
         this.products = products;
-        this.filteredProducts = this.products;
+        this.filteredProducts = this.performFilter(this.listFilter);
       },
       error => this.errorMessage = error as any
     );

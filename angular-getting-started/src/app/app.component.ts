@@ -1,26 +1,67 @@
 import { Component } from '@angular/core';
+import { AuthService } from './user/auth.service';
+import { Router, Event, NavigationStart, NavigationEnd, NavigationError, NavigationCancel } from '@angular/router';
+import { slideInAnimation } from './app.animation';
+import { MessageService } from './messages/message.service';
 
 @Component({
   selector: 'pm-root',
-  template: `
-    <nav class="navbar navbar-expand navbar-light bg-light">
-      <a class="navbar-brand">{{pageTitle}}</a>
-      <ul class="nav nav-pills">
-        <li class="nav-item"><a class="nav-link" routerLinkActive='active' [routerLink]="['/welcome']">Home</a>
-        </li>
-        <li class="nav-item"><a class="nav-link" routerLinkActive='active' [routerLinkActiveOptions]="{exact: true}"
-          [routerLink]="['/products']">Product List</a>
-        </li>
-        <li class="nav-item"><a class="nav-link" routerLinkActive='active' [routerLinkActiveOptions]="{exact: true}"
-          [routerLink]="['/products/0/edit']">Add Product</a>
-        </li>
-      </ul>
-    </nav>
-    <div class="container">
-      <router-outlet></router-outlet>
-    </div>
-  `
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css'],
+  animations: [slideInAnimation]
 })
 export class AppComponent {
-  pageTitle: string = 'Acme Product Management';
+
+  pageTitle = 'Acme Product Management';
+  loading = true;
+
+  get isLoggedIn(): boolean {
+    return this.authService.isLoggedIn;
+  }
+
+  get isMessageDisplayed(): boolean {
+    return this.messageService.isDisplayed;
+  }
+
+  get userName(): string {
+    if (this.authService.currentUser) {
+      return this.authService.currentUser.userName;
+    }
+    return '';
+  }
+
+  constructor(private router: Router,
+              private messageService: MessageService,
+              private authService: AuthService) {
+    router.events.subscribe((routerEvent: Event) => {
+      this.checkRouterEvent(routerEvent);
+    });
+  }
+
+  checkRouterEvent(routerEvent: Event): void {
+    if (routerEvent instanceof NavigationStart) {
+      this.loading = true;
+    }
+
+    if (routerEvent instanceof NavigationEnd ||
+        routerEvent instanceof NavigationCancel ||
+        routerEvent instanceof NavigationError) {
+      this.loading = false;
+    }
+  }
+
+  displayMessages(): void {
+    this.router.navigate([{ outlets: { popup: ['messages'] } }]);
+    this.messageService.isDisplayed = true;
+  }
+
+  hideMessages(): void {
+    this.router.navigate([{ outlets: { popup: null } }]);
+    this.messageService.isDisplayed = false;
+  }
+
+  logOut(): void {
+    this.authService.logout();
+    this.router.navigateByUrl('/welcome');
+  }
 }

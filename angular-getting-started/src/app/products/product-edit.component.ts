@@ -1,186 +1,141 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, ViewChildren, ElementRef } from '@angular/core';
-import { FormBuilder, FormGroup, FormControl, FormArray, Validators, FormControlName } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { Product, ProductResolved } from './product';
+import { ProductService } from './product.service';
+import { MessageService } from '../messages/message.service';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { Observable, Subscription, fromEvent, merge } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
-
-import { Product } from './product';
-import { ProductService } from './product.service';
-
-import { NumberValidators } from '../shared/number.validator';
-import { GenericValidator } from '../shared/generic-validator';
-
 @Component({
-  templateUrl: './product-edit.component.html'
+  templateUrl: './product-edit.component.html',
+  styleUrls: ['./product-edit.component.css']
 })
-export class ProductEditComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChildren(FormControlName, { read: ElementRef }) formInputElements: ElementRef[];
-
+export class ProductEditComponent implements OnInit{
+  [x: string]: any;
   pageTitle = 'Product Edit';
   errorMessage: string;
-  productForm: FormGroup;
 
-  product: Product;
-  private sub: Subscription;
+  private dataIsValid: { [key: string]: boolean } = {};
 
-  // Use with the generic validation message class
-  displayMessage: { [key: string]: string } = {};
-  private validationMessages: { [key: string]: { [key: string]: string } };
-  private genericValidator: GenericValidator;
-
-  get tags(): FormArray {
-    return this.productForm.get('tags') as FormArray;
+  get isDirty(): boolean {
+    return JSON.stringify(this.originalProduct) !== JSON.stringify(this.currentProduct);
   }
 
-  constructor(private fb: FormBuilder,
-              private route: ActivatedRoute,
-              private router: Router,
-              private productService: ProductService) {
+  private currentProduct: Product;
+  private originalProduct: Product;
 
-    // Defines all of the validation messages for the form.
-    // These could instead be retrieved from a file or database.
-    this.validationMessages = {
-      productName: {
-        required: 'Product name is required.',
-        minlength: 'Product name must be at least three characters.',
-        maxlength: 'Product name cannot exceed 50 characters.'
-      },
-      productCode: {
-        required: 'Product code is required.'
-      },
-      starRating: {
-        range: 'Rate the product between 1 (lowest) and 5 (highest).'
-      }
-    };
-
-    // Define an instance of the validator for use with this form,
-    // passing in this form's set of validation messages.
-    this.genericValidator = new GenericValidator(this.validationMessages);
+  get product(): Product {
+    return this.currentProduct;
+  }
+  set product(value: Product) {
+    this.currentProduct = value;
+    // Clone the object to retain a copy
+    this.originalProduct = { ...value };
   }
 
-  ngOnInit(): void {
-    this.productForm = this.fb.group({
-      productName: ['', [Validators.required,
-      Validators.minLength(3),
-      Validators.maxLength(50)]],
-      productCode: ['', Validators.required],
-      starRating: ['', NumberValidators.range(1, 5)],
-      tags: this.fb.array([]),
-      description: ''
-    });
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private productService: ProductService,
+    private messageService: MessageService) { }
 
-    // Read the product Id from the route parameter
-    this.sub = this.route.paramMap.subscribe(
-      params => {
-        const id = +params.get('id');
-        this.getProduct(id);
-      }
-    );
-  }
-
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
-  }
-
-  ngAfterViewInit(): void {
-    // Watch for the blur event from any input element on the form.
-    // This is required because the valueChanges does not provide notification on blur
-    const controlBlurs: Observable<any>[] = this.formInputElements
-      .map((formControl: ElementRef) => fromEvent(formControl.nativeElement, 'blur'));
-
-    // Merge the blur event observable with the valueChanges observable
-    // so we only need to subscribe once.
-    merge(this.productForm.valueChanges, ...controlBlurs).pipe(
-      debounceTime(800)
-    ).subscribe(value => {
-      this.displayMessage = this.genericValidator.processMessages(this.productForm);
+  ngOnInit() {
+    this.route.data.subscribe(data => {
+      const resolvedData: ProductResolved = data.resolvedData;
+      this.errorMessage = resolvedData.error;
+      this.onProductRetrieved(resolvedData.product);
     });
   }
 
-  addTag(): void {
-    this.tags.push(new FormControl());
-  }
-
-  deleteTag(index: number): void {
-    this.tags.removeAt(index);
-    this.tags.markAsDirty();
-  }
-
-  getProduct(id: number): void {
-    this.productService.getProduct(id)
-      .subscribe(
-        (product: Product) => this.displayProduct(product),
-        (error: any) => this.errorMessage = error as any
-      );
-  }
-
-  displayProduct(product: Product): void {
-    if (this.productForm) {
-      this.productForm.reset();
-    }
+  onProductRetrieved(product: Product): void {
     this.product = product;
 
-    if (this.product.id === 0) {
-      this.pageTitle = 'Add Product';
+    if (!this.product) {
+      this.pageTitle = 'No product found';
     } else {
-      this.pageTitle = `Edit Product: ${this.product.productName}`;
+      if (this.product.id === 0) {
+        this.pageTitle = 'Add Product';
+      } else {
+        this.pageTitle = `Edit Product: ${this.product.productName}`;
+      }
     }
-
-    // Update the data on the form
-    this.productForm.patchValue({
-      productName: this.product.productName,
-      productCode: this.product.productCode,
-      starRating: this.product.starRating,
-      description: this.product.description
-    });
-    this.productForm.setControl('tags', this.fb.array(this.product.tags || []));
   }
 
   deleteProduct(): void {
     if (this.product.id === 0) {
       // Don't delete, it was never saved.
-      this.onSaveComplete();
+      this.onSaveComplete(`${this.product.productName} was deleted`);
     } else {
       if (confirm(`Really delete the product: ${this.product.productName}?`)) {
         this.productService.deleteProduct(this.product.id)
           .subscribe(
-            () => this.onSaveComplete(),
+            () => this.onSaveComplete(`${this.product.productName} was deleted`),
             (error: any) => this.errorMessage = error as any
           );
       }
     }
   }
 
-  saveProduct(): void {
-    if (this.productForm.valid) {
-      if (this.productForm.dirty) {
-        const p = { ...this.product, ...this.productForm.value };
+  isValid(path?: string): boolean {
+    this.validate();
+    if (path) {
+      return this.dataIsValid[path];
+    }
+    return (this.dataIsValid && Object.keys(this.dataIsValid).every(d => this.dataIsValid[d] === true));
+  }
 
-        if (p.id === 0) {
-          this.productService.createProduct(p)
-            .subscribe(
-              () => this.onSaveComplete(),
-              (error: any) => this.errorMessage = error as any
-            );
-        } else {
-          this.productService.updateProduct(p)
-            .subscribe(
-              () => this.onSaveComplete(),
-              (error: any) => this.errorMessage = error as any
-            );
-        }
+  reset(): void {
+    this.dataIsValid = null;
+    this.currentProduct = null;
+    this.originalProduct = null;
+  }
+
+  saveProduct(): void {
+    if (this.isValid()) {
+      if (this.product.id === 0) {
+        this.productService.createProduct(this.product)
+          .subscribe(
+            () => this.onSaveComplete(`The new ${this.product.productName} was saved`),
+            (error: any) => this.errorMessage = error as any
+          );
       } else {
-        this.onSaveComplete();
+        this.productService.updateProduct(this.product)
+          .subscribe(
+            () => this.onSaveComplete(`The updated ${this.product.productName} was saved`),
+            (error: any) => this.errorMessage = error as any
+          );
       }
     } else {
       this.errorMessage = 'Please correct the validation errors.';
     }
   }
 
-  onSaveComplete(): void {
-    // Reset the form to clear the flags
-    this.productForm.reset();
+  onSaveComplete(message?: string): void {
+    if (message) {
+      this.messageService.addMessage(message);
+    }
+    this.reset();
+    // Navigate back to the product list
     this.router.navigate(['/products']);
+  }
+
+  validate(): void {
+    // clear the validation object
+    this.dataIsValid = {};
+
+    // 'info' tab
+    if (this.product.productName &&
+      this.product.productName.length >= 3 &&
+      this.product.productCode) {
+      this.dataIsValid.info = true;
+    } else {
+      this.dataIsValid.info = false;
+    }
+
+    // 'tags' tab
+    if (this.product.category &&
+      this.product.category.length >= 3) {
+      this.dataIsValid.tags = true;
+    } else {
+      this.dataIsValid.tags = false;
+    }
   }
 }

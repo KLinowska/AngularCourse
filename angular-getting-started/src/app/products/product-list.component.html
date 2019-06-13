@@ -28,18 +28,21 @@
             <th>Available</th>
             <th>Price</th>
             <th>5 Star Rating</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let product of filteredProducts">
             <td>
-              <img *ngIf="showImage"
+              <img *ngIf="showImage && product.imageUrl"
                 [src]="product.imageUrl"
                 [title]="product.productName"
-                [style.width.px]="imageWidth">
+                [style.width.px]="imageWidth"
+                [style.margin.px]="imageMargin">
             </td>
             <td>
-              <a [routerLink]="['/products', product.id]">
+              <a [routerLink]="['/products', product.id]"
+                 [queryParams]="{filterBy: listFilter, showImage: showImage}">
                 {{ product.productName }}
               </a>
             </td>
@@ -60,4 +63,7 @@
       </table>
     </div>
   </div>
+</div>
+<div *ngIf="errorMessage" class="alert alert-danger">
+  Error: {{ errorMessage }}
 </div>
