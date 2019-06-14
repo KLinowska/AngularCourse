@@ -16,7 +16,7 @@ export class ProductListComponent implements OnInit, AfterViewInit {
   includeDetail: boolean = true;
   @ViewChild(CriteriaComponent, {static: true}) filterComponent: CriteriaComponent;
   errorMessage: string = '';
-  parentListFilter: string = '';
+  listFilter: string = '';
   filteredProducts: Product[] = [];
   products: Product[] = [];
 
@@ -26,13 +26,14 @@ export class ProductListComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.parentListFilter = this.filterComponent.listFilter;
+    this.listFilter = this.filterComponent.listFilter;
   }
 
   performFilter(filterBy?: string): Product[] {
     filterBy = filterBy.toLocaleLowerCase();
-    return this.products.filter((product: Product) =>
+    this.filteredProducts = this.products.filter((product: Product) =>
       product.productName.toLocaleLowerCase().indexOf(filterBy) !== -1);
+    return this.filteredProducts;
   }
 
   toggleImage(): void {
@@ -43,14 +44,19 @@ export class ProductListComponent implements OnInit, AfterViewInit {
     this.pageTitle = 'Product List: ' + message;
   }
 
+  onValueChange(value: string): void {
+    this.listFilter = value;
+    this.performFilter(value);
+  }
+
   ngOnInit(): void {
-    //this.listFilter = this.route.snapshot.queryParamMap.get('filterBy') || '';
+    this.listFilter = this.route.snapshot.queryParamMap.get('filterBy') || '';
     this.showImage = this.route.snapshot.queryParamMap.get('showImage') === 'true';
 
     this.productService.getProducts().subscribe(
       products => {
         this.products = products;
-        this.filteredProducts = this.performFilter(this.parentListFilter);
+        this.filteredProducts = this.performFilter(this.listFilter);
       },
       error => this.errorMessage = error as any
     );
